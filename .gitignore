@@ -19,3 +19,10 @@ degradation_pipeline/output/
 
 # Archives
 *.zip
+
+# Personal lab notebook images (not for CI)
+docs/scripts/
+
+# Typst build artifacts
+docs/full_report.pdf
+docs/scripts-images.typ

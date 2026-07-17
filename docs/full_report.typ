@@ -183,20 +183,20 @@ $ n(("Ti"("OC"_4"H"_9)_4)) &= (9.662 "g") / (340.32 "g/mol") \
 
     table.hline(),
     table.header(
-      [idx], [颗粒数 $n$], [mean (nm)], [med (nm)], [std (nm)], [scale bar],
+      [idx], [颗粒数 $n$], [mean (nm)], [med (nm)], [std (nm)], [scale (nm/px)],
     ),
 
     table.hline(stroke: 0.5pt),
 
-    [01], [302], [452], [397], [237], [3 $mu"m"$],
-    [02], [309], [426], [379], [221], [3 $mu"m"$],
-    [03], [309], [438], [400], [225], [3 $mu"m"$],
-    [06], [523], [908], [822], [476], [5 $mu"m"$],
-    [07], [379], [819], [696], [475], [5 $mu"m"$],
-    [08], [418], [781], [674], [447], [5 $mu"m"$],
-    [09], [408], [945], [876], [469], [5 $mu"m"$],
-    [11], [590], [748], [663], [395], [5 $mu"m"$],
-    [12], [497], [857], [753], [462], [5 $mu"m"$],
+    [01], [302], [452], [397], [237], [18.18],
+    [02], [309], [426], [379], [221], [18.07],
+    [03], [309], [438], [400], [225], [18.07],
+    [06], [523], [908], [822], [476], [33.65],
+    [07], [379], [819], [696], [475], [31.06],
+    [08], [418], [781], [674], [447], [30.86],
+    [09], [408], [945], [876], [469], [37.31],
+    [11], [590], [748], [663], [395], [34.48],
+    [12], [497], [857], [753], [462], [34.72],
 
     table.hline(),
   ),
@@ -211,15 +211,15 @@ $ n(("Ti"("OC"_4"H"_9)_4)) &= (9.662 "g") / (340.32 "g/mol") \
     columns: 4,
     rows: 4,
     gutter: 0.3em,
-    grid.cell(colspan: 4, align: center)[#image("../sem_pipeline/output/annotated/01_annotated.jpg", width: 100%) (a) 01],
-    align(center)[#image("../sem_pipeline/output/annotated/02_annotated.jpg", width: 100%) (b) 02],
-    align(center)[#image("../sem_pipeline/output/annotated/03_annotated.jpg", width: 100%) (c) 03],
-    align(center)[#image("../sem_pipeline/output/annotated/06_annotated.jpg", width: 100%) (d) 06],
-    align(center)[#image("../sem_pipeline/output/annotated/07_annotated.jpg", width: 100%) (e) 07],
-    align(center)[#image("../sem_pipeline/output/annotated/08_annotated.jpg", width: 100%) (f) 08],
-    align(center)[#image("../sem_pipeline/output/annotated/09_annotated.jpg", width: 100%) (g) 09],
-    align(center)[#image("../sem_pipeline/output/annotated/11_annotated.jpg", width: 100%) (h) 11],
-    align(center)[#image("../sem_pipeline/output/annotated/12_annotated.jpg", width: 100%) (i) 12],
+    grid.cell(colspan: 4, align: center)[#image("../sem_pipeline/output/annotated/01_annotated.jpg", width: 100%) #v(-1em) (a) 01],
+    align(center)[#image("../sem_pipeline/output/annotated/02_annotated.jpg", width: 100%) #v(-1em) (b) 02],
+    align(center)[#image("../sem_pipeline/output/annotated/03_annotated.jpg", width: 100%) #v(-1em) (c) 03],
+    align(center)[#image("../sem_pipeline/output/annotated/06_annotated.jpg", width: 100%) #v(-1em) (d) 06],
+    align(center)[#image("../sem_pipeline/output/annotated/07_annotated.jpg", width: 100%) #v(-1em) (e) 07],
+    align(center)[#image("../sem_pipeline/output/annotated/08_annotated.jpg", width: 100%) #v(-1em) (f) 08],
+    align(center)[#image("../sem_pipeline/output/annotated/09_annotated.jpg", width: 100%) #v(-1em) (g) 09],
+    align(center)[#image("../sem_pipeline/output/annotated/11_annotated.jpg", width: 100%) #v(-1em) (h) 11],
+    align(center)[#image("../sem_pipeline/output/annotated/12_annotated.jpg", width: 100%) #v(-1em) (i) 12],
   ),
   caption: [SEM 颗粒分割及 Feret 直径标注图 (绿色轮廓为单颗粒, 蓝色线段为 Feret 直径, 红字标注数值) ],
 ) <fig:sem_annotated>
@@ -229,7 +229,7 @@ $ n(("Ti"("OC"_4"H"_9)_4)) &= (9.662 "g") / (340.32 "g/mol") \
 全部 3735 个颗粒的合并统计：
 
 #figure(
-  placement: auto,
+  // placement: auto,
   table(
     columns: 7,
     stroke: none,
@@ -298,7 +298,7 @@ $ n(("Ti"("OC"_4"H"_9)_4)) &= (9.662 "g") / (340.32 "g/mol") \
 *模拟参数*：采用 pymatgen ``XRDCalculator`` ($"Cu" "K"alpha$, 波长 $1.5406 " A"$, symprec = 0.1) , $2theta$ 扫描范围 $10 degree - 80 degree$, 与实验条件一致。模拟过程自动处理对称性等价反射 (multiplicity) 、原子散射因子和 Lorentz-极化因子。最终峰表不经任何事后修改 (如 JCPDS 数据库查询) 。
 
 #figure(
-  placement: auto,
+  // placement: auto,
   table(
     columns: 4,
     stroke: none,
@@ -316,7 +316,7 @@ $ n(("Ti"("OC"_4"H"_9)_4)) &= (9.662 "g") / (340.32 "g/mol") \
 ) <fig:cif_sources>
 
 #figure(
-  placement: auto,
+  // placement: auto,
   image("../xrd_pipeline/output/simulated_comparison.svg", width: 100%),
   caption: [$"TiO"_2$ 模拟粉末 XRD 参考图谱 ($"Cu" "K"alpha$, $40.0 "kV" \/ 40.0 "mA"$, $10 degree - 80 degree$) 。蓝色：锐钛矿 Anatase, 红色：金红石 Rutile。竖线高度对应归一化相对强度 (最强峰 = 100) 。],
 ) <fig:simulated_xrd>
@@ -352,7 +352,7 @@ $ D = (K lambda) / (beta cos theta) $
 由于扫描速率较高 ($10 degree"/min"$) , 衍射图谱噪声显著, 且中高角度区域衍射峰间重叠严重 (如锐钛矿 (213)/(204) 与金红石 (002) 三峰重合) 。为确保 FWHM 测量的可靠性, 仅对疏离度大于 $1.5 degree$ (即该峰与最近邻已验证峰的间距 $>= 1.5 degree$) 的孤立峰进行 Scherrer 分析。在所有经局部峰验证的 23 个衍射峰中, 仅 3 个满足孤立条件, 其余 20 个因峰间距过小 ($< 1.5 degree$) 被排除。测量结果如下：
 
 #figure(
-  placement: auto,
+  // placement: auto,
   table(
     columns: 5,
     stroke: none,
@@ -391,7 +391,7 @@ $ ln(c/c_0) = -k t $
 以 $ln(c \/ c_0)$ 对时间 $t$ 做线性回归, 求得动力学参数。
 
 #figure(
-  placement: auto,
+  // placement: auto,
   grid(
     columns: (1fr, 1fr),
     gutter: 1.5em,
@@ -446,16 +446,16 @@ $ ln(c/c_0) = -k t $
 $R^2 = 0.96$ 表明实验数据与一级动力学模型吻合良好。截距偏离理想值 0 (为 0.19) , 可能与暗吸附未能完全达到平衡或初始阶段反应机制存在短暂诱导期有关。半衰期 $t_(1\/2) = 20.4$ min, 表明催化剂具有较好的光催化降解活性。
 
 #figure(
-  placement: auto,
+  // placement: auto,
   grid(
     columns: (1fr, 1fr),
     gutter: 1em,
     align(center + horizon)[
-      #image("../degradation_pipeline/output/degradation_curve.svg", width: 100%)
+      #image("../degradation_pipeline/output/degradation_curve.svg", width: 100%) #v(-1em)
       (a) $"TiO"_2$ 光催化降解 RhB 曲线 ($c \/ c_0$ vs $t$)
     ],
     align(center + horizon)[
-      #image("../degradation_pipeline/output/kinetic_fit.svg", width: 100%)
+      #image("../degradation_pipeline/output/kinetic_fit.svg", width: 100%) #v(-1em)
       (b) 一级动力学拟合 ($ln(c \/ c_0)$ vs $t$)
     ],
   ),
@@ -543,3 +543,7 @@ Scherrer 公式估算的晶粒尺寸 (@fig:scherrer_table) 表明锐钛矿相干
 #set par(first-line-indent: 0em)
 #set bibliography(style: "ieee", title: "参考文献")
 #bibliography("refs/refs.bib")
+
+#pagebreak()
+
+#include "scripts-images.typ"
