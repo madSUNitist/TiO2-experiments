@@ -1,0 +1,44 @@
+# AFLOW.org Repositories
+# OTi/A2B_tP6_136_f_a-001 params=4.5922,0.644005,0.30496 SG=136 [ANRL doi: 10.1016/j.commatsci.2017.01.017 (part 1), doi: 10.1016/j.commatsci.2018.10.043 (part 2)]
+data_OTi
+_pd_phase_name A2B_tP6_136_f_a-001
+_cell_length_a  4.5922000000
+_cell_length_b  4.5922000000
+_cell_length_c  2.9573997610
+_cell_angle_alpha  90.0000000000
+_cell_angle_beta  90.0000000000
+_cell_angle_gamma  90.0000000000
+_symmetry_space_group_name_H-M  'P4_{2}/mnm'
+_symmetry_Int_Tables_Number  136
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  x,y,z
+  2  -x,-y,z
+  3  -y+1/2,x+1/2,z+1/2
+  4  y+1/2,-x+1/2,z+1/2
+  5  -x+1/2,y+1/2,-z+1/2
+  6  x+1/2,-y+1/2,-z+1/2
+  7  y,x,-z
+  8  -y,-x,-z
+  9  -x,-y,-z
+  10  x,y,-z
+  11  y+1/2,-x+1/2,-z+1/2
+  12  -y+1/2,x+1/2,-z+1/2
+  13  x+1/2,-y+1/2,z+1/2
+  14  -x+1/2,y+1/2,z+1/2
+  15  -y,-x,z
+  16  y,x,z
+loop_
+ _atom_site_label
+ _atom_site_occupancy
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_adp_type
+ _atom_site_B_iso_or_equiv
+ _atom_site_type_symbol
+ _atom_site_symmetry_multiplicity
+ _atom_site_Wyckoff_label
+O1 1.0000000000 0.3049600000 0.3049600000 0.0000000000  Biso 1.0 O 4 f
+Ti2 1.0000000000 0.0000000000 0.0000000000 0.0000000000  Biso 1.0 Ti 2 a

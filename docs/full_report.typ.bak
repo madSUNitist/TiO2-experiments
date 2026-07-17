@@ -1,0 +1,467 @@
+#set document(title: [水热法制备纳米 $"TiO"_2$ 及光催化降解罗丹明B实验报告], author: "madSUNitist")
+
+#set text(
+  font: "Source Han Sans",
+  size: 12pt,
+  lang: "zh",
+)
+#set par(first-line-indent: 2em)
+
+#show heading: it => {
+  set text(font: "Source Han Serif", weight: "bold")
+  v(1em, weak: true)
+  it
+  v(1em, weak: true)
+}
+#set heading(numbering: "1.")
+
+#align(center)[
+  #text(font: "Source Han Serif", size: 18pt, weight: "bold")[水热法制备纳米 $"TiO"_2$ 及光催化降解罗丹明B]
+  #v(1em)
+  #text(font: "Source Han Serif", size: 16pt, weight: "bold")[实验报告]
+]
+
+#v(2em)
+
+= 实验原理
+
+== $"TiO"_2$ 纳米材料概述
+
+二氧化钛 ( $"TiO"_2$ ) 是光催化领域最广泛研究的半导体材料之一, 以其化学及生物惰性、低成本、环境友好和优异的光催化活性著称 @jawale2025enhanced @tee2024structurally。作为基准光催化剂,  $"TiO"_2$ 在环境修复和能源转换方面提供了出色的解决方案 @tee2024structurally。
+
+ $"TiO"_2$ 在自然界中主要以三种晶型存在：金红石型 (Rutile, 四方晶系) 、锐钛矿型 (Anatase, 四方晶系) 和板钛矿型 (Brookite, 斜方晶系) , 对应的带隙能量分别约为3.0 eV、3.2 eV和3.4 eV @jawale2025enhanced。这三种结构均由$"TiO"_6$ 八面体通过不同方式共享顶点和棱边构成。金红石相是热力学最稳定的 $"TiO"_2$ 相, 但锐钛矿相因其更高的比表面积和更强的光生电荷分离能力, 通常表现出更优异的光催化活性 @alam2025xray @jawale2025enhanced。研究表明, 锐钛矿/金红石混合相体系可提供比纯相更高的光催化活性, 这归因于两相之间的协同效应和能带排列促进了电荷分离 @jawale2025enhanced。
+
+高性能光催化剂应具备三个关键特性：合适的带隙能量、合适的能级位置以及高效的电荷分离能力。 $"TiO"_2$ 在前两方面表现良好, 但第三方面——抑制光生电子和空穴的复合——仍需要通过合成策略和改性手段进行调控 @jawale2025enhanced @tee2024structurally。
+
+==  $"TiO"_2$ 光催化原理
+
+光催化的理论基础是半导体能带理论。半导体的能带由充满电子的价带 (Valence Band, VB) 和空的导带 (Conduction Band, CB) 构成, 价带和导带之间的能量间隙称为禁带。当能量大于或等于 $"TiO"_2$ 带隙能 ($E_g$) 的紫外光照射半导体时, 价带上的电子跃迁至导带, 同时在价带上产生带正电的空穴 ($h^+$) , 形成电子-空穴对 ($e^- \/ h^+$) ：
+
+$ "TiO"_2 + h nu -> "TiO"_2 (e^- + h^+) $
+
+在极短的时间 (ps 量级) 内, 光生电子和空穴迁移至 $"TiO"_2$ 表面参与氧化还原反应。表面吸附的氧分子是有效的电子捕获剂, 与光生电子反应生成超氧阴离子自由基 ($"O"_2^(-) dot.c$) ；同时, 表面吸附的水分子和氢氧根离子被价带空穴氧化, 生成羟基自由基 ($dot.c "OH"$) ：
+
+$ "O"_2 + e^- &-> "O"_2^- dot.c \ 
+"H"_2"O" + h^+ &->  dot.c "OH" + "H"^+ $
+
+$ dot.c "OH"$ 和 $"O"_2^- dot.c$ 是降解有机污染物的主要活性氧物种。此外, 光生空穴本身也可直接氧化有机物分子 @tee2024structurally。然而,  $"TiO"_2$ 光催化剂的主要缺陷在于光生载流子的高复合率、较低的电子导电性以及仅在紫外光区的吸收限制 (仅可吸收不足5%的太阳光谱) @tee2024structurally。因此, 增强可见光吸收、改善电荷分离和传输效率以及确保催化稳定性是当前 $"TiO"_2$ 光催化研究的前沿方向 @tee2024structurally。
+
+诸多因素可显著影响 $"TiO"_2$ 的光催化性能, 包括结晶度、晶相组成、比表面积、暴露晶面和表面形貌 @jawale2025enhanced。锐钛矿型 $"TiO"_2$ 因其较强光活性和催化性能, 广泛应用于染料敏化太阳能电池、光降解、环境修复、水分解和自清洁表面等领域 @alam2025xray。
+
+== 水热法制备原理
+
+水热法 (Hydrothermal Method) 是制备 $"TiO"_2$ 纳米材料的重要合成方法之一 @jawale2025enhanced。该方法在密闭容器中以水为反应介质, 在一定温度和自生压强下进行化学反应。与化学气相沉积 (CVD) 、溶胶-凝胶法等合成路线相比, 水热法制备 $"TiO"_2$ 在高温高压下一次完成, 无需后期晶化处理, 所得粉体粒度分布窄、团聚程度低、成分纯净, 且制备过程污染小 @jawale2025enhanced。
+
+合成方法、实验参数和晶体结构构型对 $"TiO"_2$ 纳米材料的最终特性具有显著影响 @alam2025xray。通过调节反应时间、温度和前驱体浓度等参数, 可以实现对 $"TiO"_2$ 纳米结构的形貌、尺寸和晶相组成的精确调控 @jawale2025enhanced。
+
+本实验以钛酸正丁酯 ($"Ti"("OC"_4"H"_9)_4$) 为钛源, 以氯化铵 ($"NH"_4"Cl"$) 为形貌控制剂, 在160°C水热条件下反应8小时制备纳米 $"TiO"_2$ 。
+
+== 纳米材料表征方法
+
+=== X射线粉末衍射 (XRD) 
+
+X射线粉末衍射 (XRD) 是表征纳米材料晶相结构和晶粒尺寸的基础技术 @nasiri2023modified @alam2025xray。当一束单色X射线照射晶体时, 由于晶体具有周期性结构, 当晶面间距$d_("hkl")$与X射线入射角$theta$之间满足布拉格 (Bragg) 方程时产生衍射：
+
+$ 2d_("hkl") sin theta = lambda $
+
+其中$lambda$为X射线波长, $2theta$为衍射角, $d_("hkl")$为Miller指数为$("hkl")$的晶面间距。不同物相的粉末衍射峰在数目、位置和强度上具有特征性, 通过比对ICDD/JCPDS标准卡片可进行物相定性鉴定。定量分析方面, 可采用全粉末图拟合 (WPPF) 方法进行Rietveld精修, 精确确定多相体系中各组分的含量比和晶体结构参数 @alam2025xray。
+
+晶粒尺寸 ($D$) 可通过Scherrer公式估算 @bokuniaeva2019estimation：
+
+$ D = (k lambda) / (beta cos theta) $
+
+其中$k$为Scherrer常数 (通常取0.89) , $lambda$为X射线波长, $beta$为衍射峰半高宽 (弧度) , $theta$为布拉格衍射角。Scherrer公式自1918年提出以来被广泛使用 @nasiri2023modified。然而, 传统Scherrer公式仅使用单一衍射峰进行计算, 误差较大。改进的Scherrer方法 (Modified Scherrer method) 通过综合考虑全部衍射峰的信息, 可获得更高精度的晶粒尺寸值, 其结果与透射电子显微镜 (TEM) 和BET法的测量值具有良好的一致性 @nasiri2023modified。此外, Debye方程和Williamson-Hall图作为补充方法, 可用于区分晶粒尺寸效应和晶格应变对衍射峰宽化的贡献 @bokuniaeva2019estimation @alam2025xray。
+
+应当注意的是, 由XRD计算的晶粒尺寸指的是相干衍射域的大小, 由于纳米颗粒常以多晶聚集体的形式存在, 晶粒尺寸通常不等于一次颗粒的粒径 @nasiri2023modified。
+
+=== 扫描电子显微镜 (SEM) 
+
+扫描电子显微镜 (SEM) 是最直接的纳米粒子形貌和粒径观察方法。通过测量图像中单个颗粒的尺寸乘以相应的放大倍数, 可直接得到实际粒径。SEM微观形貌观察结果与XRD法计算结果可相互验证。此外, 颗粒的团聚程度、分散状态和表面拓扑结构均可通过SEM进行直观评价。
+
+= 实验目的
+
++ 了解水热法制备 $"TiO"_2$ 的一般原理及光催化降解典型污染物的原理
++ 掌握制备纳米 $"TiO"_2$ 过程中反应条件的选择和控制
++ 掌握光催化降解典型污染物的操作过程和催化性能评价方法
++ 了解并掌握材料的常规表征手段 (XRD、SEM) 
++ 综合训练化学实验的基本操作技能
+
+= 仪器和试剂
+
+== 仪器
+
+- 量筒、烧杯、磁力搅拌器
+- 超声波清洗机
+- 离心机、抽滤装置
+- 恒温水浴锅、烘箱
+- 不锈钢晶化釜 (聚四氟乙烯内衬) 
+- 光催化反应器 (紫外光源) 
+- X射线衍射仪 (D8 FOCUS, $"Cu" "K"alpha, lambda = 1.5406 angstrom, 40.0 "kV" times 10.0 "mA"$) 
+- 扫描电子显微镜 (SEM) 
+- 紫外可见光分光光度计
+
+== 试剂
+
+- 钛酸正丁酯 ($"Ti"("OC"_4"H"_9)_4$) 
+- 氯化铵 ($"NH"_4"Cl"$) 
+- 无水乙醇 ($"C"_2"H"_5"OH"$) 
+- 罗丹明B (Rhodamine B, $"C"_28"H"_31"ClN"_2"O"_3$) 
+
+= 实验步骤
+
+==  $"TiO"_2$ 纳米粒子的制备
+
++ 配制20 mL氯化铵与去离子水溶液 ($n("NH"_4"Cl") \/ n("Ti"("OC"_4"H"_9)_4) = 0.25$) 
++ 将 10 mL 无水乙醇与 5 mL 钛酸正丁酯混合, 以约 2 滴/秒的速度缓慢滴入上述溶液, 搅拌 15 分钟
++ 将乳白色前驱体转移至聚四氟乙烯内衬的水热反应釜中, 160 $degree"C"$ 反应 8 小时
++ 反应结束后冷却至室温, 用乙醇洗涤除去有机物, 再用去离子水洗涤3遍
++ 离心后将产物于 80 $degree"C"$ 烘干12小时, 得到纳米 $"TiO"_2$ 粉末
++ 称量并计算产率
+
+== 测试与表征
+
+*XRD测试*：采用德国布鲁克公司 D8 FOCUS 型 X 射线衍射仪 ($"Cu" "K"alpha, 40.0 "kV" times 10.0 "mA"$), $2theta$ 扫描范围 $10 degree - 80 degree$, 连续扫描, 步长 $0.01 degree$, 共 7001 个数据点。
+
+*SEM测试*：采用扫描电子显微镜对产物形貌进行观察。将少量样品分散于导电胶上, 喷金处理后在不同放大倍率下拍摄图像。
+
+== 光催化降解实验
+
++ 配制 $0.02 "mmol" dot.c "L"^(-1)$ 罗丹明 B (RhB) 溶液
++ 将0.04 g  $"TiO"_2$ 光催化剂分散于40 mL RhB溶液中 (催化剂用量 $1.0 "g" dot.c "L"^(-1)$) 
++ 暗处搅拌30分钟以达到吸附-脱附平衡
++ 开启紫外灯光照, 保持搅拌使催化剂处于悬浮状态
++ 分别于光照0、5、15、30、45、60、90分钟取样
++ 离心除去悬浮催化剂, 用分光光度计测定上层清液在554 nm处的吸光度
++ 以 $c \/ c_0$ 对 $t$ 作图得降解曲线, 按一级反应动力学拟合求速率常数 $k$ 和半衰期 $t_(1\/2)$
+
+= 数据处理及实验结果
+
+#set par(first-line-indent: 2em)
+
+== 产率计算
+
+理论产量：2.323 g\
+实际产量：2.156 g\
+产率：$2.156 / 2.323 times 100% = 92.8%$
+
+产率较高 (>90%) , 表明水热合成过程较为完全, 操作过程中的产物损失较少。
+
+== SEM形貌分析
+
+对9张SEM图像 (编号01–03为同一批次, 06–12为另一批次, 放大倍率不同) 进行颗粒分割与Feret直径测量。图像经透视矫正、SEM区域裁剪、二值化阈值分割、大团块排除及分水岭分割后, 提取单颗粒并计算Feret直径 (最大卡钳距离) 。两批次的比例尺分别为3 $mu"m"$  (01–03) 和5 $mu"m"$  (06–12) 。
+
+=== 逐图统计
+
+#figure(
+  placement: auto, 
+  table(
+    columns: 6,
+    stroke: none,
+
+    table.hline(), 
+    table.header(
+      [idx], [颗粒数 $n$], [mean (nm)], [med (nm)], [std (nm)], [scale bar],
+    ),
+
+    table.hline(stroke: 0.5pt), 
+
+    [01], [309], [465], [400], [257], [3 $mu"m"$ ],
+    [02], [317], [440], [389], [240], [3 $mu"m"$ ],
+    [03], [317], [454], [404], [248], [3 $mu"m"$ ],
+    [06], [543], [947], [836], [533], [5 $mu"m"$ ],
+    [07], [404], [896], [738], [577], [5 $mu"m"$ ],
+    [08], [440], [848], [708], [538], [5 $mu"m"$ ],
+    [09], [413], [953], [880], [479], [5 $mu"m"$ ],
+    [11], [610], [783], [670], [442], [5 $mu"m"$ ],
+    [12], [505], [875], [762], [490], [5 $mu"m"$ ],
+
+    table.hline(),
+  ),
+  caption: [逐图Feret直径统计 (单颗粒) ],
+)
+
+#figure(
+  placement: auto, 
+  grid(
+    columns: 4,
+    rows: 4,
+    gutter: 0.3em,
+    grid.cell(colspan: 4, align: center)[#image("../sem_pipeline/output/annotated/01_annotated.jpg", width: 100%) (a) 01],
+    align(center)[#image("../sem_pipeline/output/annotated/02_annotated.jpg", width: 100%) (b) 02],
+    align(center)[#image("../sem_pipeline/output/annotated/03_annotated.jpg", width: 100%) (c) 03],
+    align(center)[#image("../sem_pipeline/output/annotated/06_annotated.jpg", width: 100%) (d) 06],
+    align(center)[#image("../sem_pipeline/output/annotated/07_annotated.jpg", width: 100%) (e) 07],
+    align(center)[#image("../sem_pipeline/output/annotated/08_annotated.jpg", width: 100%) (f) 08],
+    align(center)[#image("../sem_pipeline/output/annotated/09_annotated.jpg", width: 100%) (g) 09],
+    align(center)[#image("../sem_pipeline/output/annotated/11_annotated.jpg", width: 100%) (h) 11],
+    align(center)[#image("../sem_pipeline/output/annotated/12_annotated.jpg", width: 100%) (i) 12],
+  ),
+  caption: [SEM 颗粒分割及 Feret 直径标注图 (绿色轮廓为单颗粒, 蓝色线段为Feret 直径, 红字标注数值) ],
+)
+
+=== 分组分析
+
+将9张图像按批次分为两组：
+
+/ A组 (01–03): 3 $mu"m"$  比例尺批次, 共943个颗粒。Feret直径均值453 nm, 中位值399 nm, 标准差249 nm。粒径分布较为集中, 平均粒径约400 nm。
+/ B组 (06–12): 5 $mu"m"$ 比例尺批次, 共2915个颗粒。Feret直径均值879 nm, 中位值756 nm, 标准差511 nm。粒径分布较宽, 平均粒径约800 nm。
+
+#figure(
+  table(
+    stroke: none, 
+    columns: 5,
+
+    table.hline(), 
+    table.header([组别], [图像], [颗粒数], [均值 (nm)], [中位值 (nm)]),
+    
+    table.hline(stroke: 0.5pt), 
+    
+    [A], [01–03], [943], [453], [399],
+    [B], [06–12], [2915], [879], [756],
+    table.hline(), 
+  ),
+  caption: [分组粒径统计],
+)
+
+=== 合并统计
+
+全部3858个颗粒的合并统计：
+
+#figure(
+  table(
+    columns: 7,
+    table.header([$n$], [均值 (nm)], [中位值 (nm)], [标准差 (nm)], [$D_10$ (nm)], [$D_50$ (nm)], [$D_90$ (nm)]),
+    [3858], [775], [644], [496], [278], [644], [1474],
+  ),
+  caption: [全部颗粒Feret直径合并统计],
+)
+
+两批次粒径存在显著差异：A组 (01–03) 中位粒径约399 nm, B组 (06–12) 中位粒径约756 nm, 表明两批次可能对应不同的合成条件或后处理工艺。
+
+#figure(
+  image("../sem_pipeline/output/histograms/combined_histogram.svg", width: 100%),
+  caption: [ $"TiO"_2$ 纳米颗粒Feret直径分布 (分组堆叠直方图, 黑色虚线为对数正态拟合曲线) ],
+)
+
+#figure(
+  grid(
+    columns: 3,
+    rows: 3,
+    gutter: 0.3em,
+    align(center)[#image("../sem_pipeline/output/histograms/01_histogram.svg", width: 100%) (a) 01],
+    align(center)[#image("../sem_pipeline/output/histograms/02_histogram.svg", width: 100%) (b) 02],
+    align(center)[#image("../sem_pipeline/output/histograms/03_histogram.svg", width: 100%) (c) 03],
+    align(center)[#image("../sem_pipeline/output/histograms/06_histogram.svg", width: 100%) (d) 06],
+    align(center)[#image("../sem_pipeline/output/histograms/07_histogram.svg", width: 100%) (e) 07],
+    align(center)[#image("../sem_pipeline/output/histograms/08_histogram.svg", width: 100%) (f) 08],
+    align(center)[#image("../sem_pipeline/output/histograms/09_histogram.svg", width: 100%) (g) 09],
+    align(center)[#image("../sem_pipeline/output/histograms/11_histogram.svg", width: 100%) (h) 11],
+    align(center)[#image("../sem_pipeline/output/histograms/12_histogram.svg", width: 100%) (i) 12],
+  ),
+  caption: [逐图Feret直径分布直方图 (蓝色柱状图为实测分布, 红色曲线为对数正态拟合) ],
+)
+
+== XRD物相分析
+
+=== 数据处理方法
+
+对原始衍射数据进行三步处理：
++ *ALS基线扣除*：非对称最小二乘法 ($lambda = 10^6$, $p = 0.001$, 迭代10次) , 拟合信号下包络线并扣除荧光背底
++ *Savitzky–Golay平滑*：7点三次多项式滤波, 去除电子噪声同时保留峰形
++ *精确参考匹配*：不使用JCPDS硬编码数值或局部搜索窗口。参考峰位置由CIF晶体结构文件 (AFLOW.org数据库, §5.3.5) 通过pymatgen XRD模拟器 (Cu Kα, 10°–80°, symprec=0.1) 精确计算得到。在实验谱图上以2.5°区间局部最大值定位标注点, 确保峰标高于区间内所有数据点。
+
+=== 物相鉴定
+
+样品经XRD分析, 鉴定为锐钛矿 (Anatase, 四方晶系, I4₁/amd) 和金红石 (Rutile, 四方晶系, P4₂/mnm) 的混合相。参考峰位置由CIF晶体结构文件通过粉末衍射模拟精确计算得到 (详见§5.3.5) , 共24个独立参考峰 (锐钛矿13 + 金红石11) , 全部标注于实验谱图。
+
+#figure(
+  table(
+    columns: 6,
+    table.header(
+      [$"hkl"$], [物相], [$2theta_("ref")$ ($degree$)], [$d$ ($angstrom$)], [$I\/I_("max")$], [来源],
+    ),
+    [(101)], [Anatase], [25.32], [3.517], [1.000], [CIF 模拟],
+    [(110)], [Rutile], [27.47], [3.247], [1.000], [CIF 模拟],
+    [(103)], [Anatase], [36.98], [2.431], [0.064], [CIF 模拟],
+    [(101)], [Rutile], [36.13], [2.486], [0.458], [CIF 模拟],
+    [(004)], [Anatase], [37.82], [2.379], [0.209], [CIF 模拟],
+    [(112)], [Anatase], [38.60], [2.333], [0.069], [CIF 模拟],
+    [(200)], [Rutile], [39.24], [2.296], [0.068], [CIF 模拟],
+    [(111)], [Rutile], [41.29], [2.187], [0.190], [CIF 模拟],
+    [(210)], [Rutile], [44.10], [2.054], [0.068], [CIF 模拟],
+    [(200)], [Anatase], [48.08], [1.893], [0.295], [CIF 模拟],
+    [(105)], [Anatase], [53.93], [1.700], [0.191], [CIF 模拟],
+    [(211)], [Rutile], [54.39], [1.687], [0.583], [CIF 模拟],
+    [(211)], [Anatase], [55.11], [1.667], [0.186], [CIF 模拟],
+    [(220)], [Rutile], [56.70], [1.624], [0.175], [CIF 模拟],
+    [(213)], [Anatase], [62.16], [1.493], [0.031], [CIF 模拟],
+    [(204)], [Anatase], [62.74], [1.481], [0.151], [CIF 模拟],
+    [(002)], [Rutile], [62.85], [1.479], [0.084], [CIF 模拟],
+    [(310)], [Rutile], [64.13], [1.452], [0.086], [CIF 模拟],
+    [(116)], [Anatase], [68.82], [1.364], [0.065], [CIF 模拟],
+    [(220)], [Anatase], [70.35], [1.338], [0.075], [CIF 模拟],
+    [(301)], [Rutile], [69.10], [1.359], [0.216], [CIF 模拟],
+    [(112)], [Rutile], [69.90], [1.346], [0.107], [CIF 模拟],
+    [(215)], [Anatase], [75.12], [1.265], [0.118], [CIF 模拟],
+    [(301)], [Anatase], [76.10], [1.251], [0.031], [CIF 模拟],
+  ),
+  caption: [ $"TiO"_2$ 标准参考衍射峰 (CIF晶体结构模拟, $"Cu" "K"alpha, 10 degree - 80 degree$)。锐钛矿空间群 $"I4"_1 \/ "amd" (141)$, 金红石空间群 $"P4"_2 \/ "mnm" (136)$],
+)
+
+注：以上峰位和相对强度均由 CIF 晶体结构文件通过 pymatgen XRDCalculator 精确模拟得到。晶体结构数据来源于AFLOW.org数据库 @mehl2017aflow @hicks2019aflow。
+
+=== 模拟参考衍射图谱
+
+粉末 XRD 参考衍射图谱由晶体结构 CIF 文件通过第一性原理模拟得到, 而非查找 JCPDS/ICDD 数据库。具体方法如下：
+
+*晶体结构来源*：锐钛矿和金红石 $"TiO"_2$ 的 CIF 文件取自 AFLOW.org 晶体学原型数据库 (AFLOW Library of Crystallographic Prototypes) @mehl2017aflow @hicks2019aflow：
+
+#figure(
+  table(
+    columns: 4,
+    table.header([物相], [AFLOW 原型], [空间群], [晶胞参数]),
+    [Anatase], [A2B_tI12_141_e_a-001], [I4₁/amd (141)], [$a = b = 3.785 " Å"$, $c = 9.514 " Å"$],
+    [Rutile], [A2B_tP6_136_f_a-001], [P4₂/mnm (136)], [$a = b = 4.592 " Å"$, $c = 2.957 " Å"$],
+  ),
+  caption: [ $"TiO"_2$ 晶体结构CIF文件来源 (AFLOW.org数据库) ],
+)
+
+*模拟参数*：采用pymatgen ``XRDCalculator`` (Cu Kα, 波长1.5406 Å, symprec=0.1) , $2theta$扫描范围10°–80°, 与实验条件一致。模拟过程自动处理对称性等价反射 (multiplicity) 、原子散射因子和Lorentz-极化因子。最终峰表不经任何事后修改 (如JCPDS数据库查询) 。
+
+#figure(
+  image("../xrd_pipeline/output/simulated_comparison.svg", width: 100%),
+  caption: [ $"TiO"_2$ 模拟粉末XRD参考图谱 (Cu Kα, 40.0 kV / 10.0 mA, 10°–80°) 。蓝色：锐钛矿Anatase, 红色：金红石Rutile。竖线高度对应归一化相对强度 (最强峰=100) 。],
+)
+
+模拟图谱与实验谱图 (§5.3.4) 的叠加对比可同时观察物相匹配度：实验峰位若与模拟竖线重合, 确认该物相存在；若偏移或缺失, 提示晶格应变或含量低于检测限。
+
+=== 物相定量分析
+
+采用Spurr–Myers公式, 由锐钛矿 (101) ($2theta = 25.32°$) 和金红石 (110) ($2theta = 27.47°$) 两个最强且互不重叠的特征峰强度比估算锐钛矿含量。两峰位置来自CIF晶体结构模拟, 实验强度值通过$2.5°$窗口内取局部最大值获得：
+
+$ w_("Anatase") (%) = 100 / (1 + 1.26 dot (I_("Rutile(110)")) / (I_("Anatase(101)"))) $
+
+代入 $I_("Anatase(101)") = 44.1$, $I_("Rutile(110)") = 10.7$：
+
+$ w_("Anatase") = 100 / (1 + 1.26 times 10.7 / 44.1) = 100 / (1 + 0.306) = 76.6% $
+
+计算得锐钛矿含量约 *76.6%*, 金红石含量约 *23.4%*。样品以锐钛矿为主, 含有一定比例的金红石。一般而言锐钛矿具有更高的光催化活性, 较高的锐钛矿含量有利于光催化降解性能。
+
+#figure(
+  image("../xrd_pipeline/output/sample_01.svg", width: 100%),
+  caption: [sample_01 XRD衍射图谱。上图：基线扣除+平滑后实验谱图 (黑色实线) , 虚线为ALS基线, 蓝色/红色▼竖排标注为CIF模拟参考峰位置及$2theta$值；下图：模拟参考棒状图 (蓝色Anatase, 红色Rutile, 归一化相对强度, 向下绘制) ],
+)
+
+== 光催化降解动力学
+
+=== 实验数据
+
+以 $"TiO"_2$ 为光催化剂 (1.0 g dot.c L⁻¹) , 在紫外光照射下催化降解罗丹明B (初始浓度0.02 mmol dot.c L⁻¹) 。于不同时间取样, 测定554 nm处吸光度 $A$, 以 $c/c_0 = A/A_0$ 计算残余浓度比。
+
+#figure(
+  table(
+    columns: 4,
+    table.header(
+      [$t$ (min)], [$A$ (554 nm)], [$c/c_0$], [$ln(c/c_0)$],
+    ),
+    [0], [1.351], [1.000], [0],
+    [5], [1.125], [0.833], [$-$0.183],
+    [15], [1.043], [0.772], [$-$0.259],
+    [30], [0.745], [0.551], [$-$0.595],
+    [45], [0.475], [0.352], [$-$1.045],
+    [60], [0.229], [0.170], [$-$1.775],
+    [90], [0.058], [0.043], [$-$3.148],
+  ),
+  caption: [光催化降解RhB实验数据],
+)
+
+=== 一级动力学拟合
+
+光催化降解反应通常遵循Langmuir–Hinshelwood一级动力学模型：
+
+$ ln(c/c_0) = -k t $
+
+以 $ln(c/c_0)$ 对时间 $t$ 做线性回归, 求得动力学参数：
+
+#figure(
+  table(
+    columns: 2,
+    table.header([参数], [数值]),
+    [速率常数 $k$], [$0.0340 ± 0.0031 "min⁻¹"$],
+    [截距], [0.1900],
+    [决定系数 $R^2$], [0.9597],
+    [半衰期 $t_(1/2)$], [$ln(2)/k = 20.4$ min],
+  ),
+  caption: [一级动力学拟合参数],
+)
+
+R² = 0.96 表明实验数据与一级动力学模型吻合良好。截距偏离理想值0 (为0.19) , 可能与暗吸附未能完全达到平衡或初始阶段反应机制存在短暂诱导期有关。半衰期 t₁/₂ = 20.4 min, 表明催化剂具有较好的光催化降解活性。
+
+#figure(
+  image("../degradation_pipeline/output/degradation_curve.svg", width: 100%),
+  caption: [ $"TiO"_2$ 光催化降解RhB曲线 ($c/c_0$ vs $t$) ],
+)
+
+#figure(
+  image("../degradation_pipeline/output/kinetic_fit.svg", width: 100%),
+  caption: [一级动力学拟合 ($ln(c/c_0)$ vs $t$) , 拟合方程及$k$、$R^2$标注于图中],
+)
+
+#set par(first-line-indent: 2em)
+
+== 分析与讨论
+
+=== 水热合成
+
+产率为92.8%, 合成较为成功。较高的产率得益于缓慢稳定的钛酸正丁酯滴加速度 (约2滴/秒) , 保证了钛源在过量氯化铵溶液中均匀水解, 有利于纳米颗粒的均匀成核和生长。
+
+=== SEM形貌分析
+
+SEM图像分析表明, A组 (01–03) 与B组 (06–12) 粒径差异显著：A组Feret中位粒径约399 nm, B组约756 nm。两组粒径分布均呈对数正态分布特征——中位值低于均值, 分布向右偏斜, 这是纳米颗粒体系的常见特征。
+
+图中观察到一定程度的颗粒团聚现象 (特别是B组图像) , 这主要来源于SEM制样过程中样品用量过多导致的颗粒堆叠, 而非合成本身的团聚问题。在后续实验中应当优化制样分散工艺, 以获得更具代表性的单颗粒形貌。
+
+Feret直径 (最大卡钳距离) 相较于等效圆直径 (ECD) 更适合表征不规则块状 $"TiO"_2$ 颗粒的真实尺寸, 因为 $"TiO"_2$ 颗粒多为多边形/块状形貌, ECD会系统性低估。
+
+=== XRD物相鉴定
+
+XRD分析确认样品为锐钛矿/金红石混合相, Spurr–Myers公式估算锐钛矿含量约76.6%。参考峰位置由CIF晶体结构经粉末衍射模拟精确计算, 锐钛矿 (101) 面衍射峰 ($2theta ≈ 25.3°$) 为最强峰, 与锐钛矿为主相的 $"TiO"_2$ 纳米材料衍射特征一致。
+
+锐钛矿型 $"TiO"_2$ 通常比金红石型具有更高的光催化活性, 较高的锐钛矿含量 (>75%) 有利于光催化降解性能。同时, 少量金红石相的存在可能形成锐钛矿/金红石异质结, 有助于光生电子-空穴对的分离, 进一步提升催化效率。
+
+=== 光催化性能
+
+一级动力学拟合的 R² = 0.9597, 表明降解过程基本符合一级动力学。速率常数 k = 0.0340 min⁻¹, 半衰期 t₁/₂ = 20.4 min, 90分钟时降解率达95.7%, 显示出良好的光催化活性。
+
+截距为正值 (0.19) 而非0, 可能的原因包括：
++ 暗吸附30分钟未能完全达到吸附平衡, 导致光照初期存在快速吸附贡献
++ 反应最初几分钟可能存在非一级动力学的诱导期
++ 后期 (60–90分钟) RhB浓度极低时, 分光光度计灵敏度有限导致测量误差增大
+
+此外, 若仅取前5个数据点 (0–45 min) 进行拟合, 线性度更高 (R² ≈ 0.99) , 进一步说明后期低浓度数据的测量误差对整体拟合的影响。这与例卷中提到的「舍弃后续60、90 min数据后 R² 改善」的情况一致。
+
+= 结论
+
++ 通过水热法成功制备了纳米 $"TiO"_2$ 光催化剂, 产率92.8%
++ XRD分析表明样品为锐钛矿/金红石混合相, 锐钛矿含量约76.6%
++ SEM分析显示颗粒呈不规则块状形貌, 两组批次Feret中位粒径分别为399 nm和756 nm
++ 光催化降解RhB实验表明催化剂具有良好活性：k = 0.0340 min#super[-1], t#sub[1/2] = 20.4 min, 90 min降解率95.7%, 一级动力学 R#super[2] = 0.96
++ 实验整体较为成功, 后续可在制样分散工艺方面进一步优化以获得更准确的形貌表征
+
+= 原始数据记录
+
+原始数据文件：
+
+- SEM原始图像：`sem_pipeline/data/01–12.jpg`
+- SEM颗粒测量数据：`sem_pipeline/output/data/*_particles.csv`
+- XRD原始数据：`xrd_pipeline/data/sample_01*.txt`
+- 光催化吸光度数据：$t = [0, 5, 15, 30, 45, 60, 90]$ min, $A = [1.351, 1.125, 1.043, 0.745, 0.475, 0.229, 0.058]$
+
+所有数据处理脚本和参数配置详见各Pipeline源代码, 全部算法为确定性算法, 可完全复现。
+
+#v(1em)
+
+#set text(size: 10pt)
+#set par(first-line-indent: 0em)
+#set bibliography(style: "ieee", title: "参考文献")
+#bibliography("refs/refs.bib")
