@@ -2,7 +2,7 @@ name: Build Report PDF
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - "docs/full_report.typ"
       - "docs/refs/**"
