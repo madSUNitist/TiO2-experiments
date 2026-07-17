@@ -14,11 +14,12 @@ from .config import (
     SIM_VOLTAGE_KV, SIM_CURRENT_MA, SIM_WAVELENGTH_A,
     SIM_TWO_THETA_RANGE,
     SCHERRER_K, WAVELENGTH_NM, INSTRUMENTAL_FWHM_DEG,
+    SCHERRER_MIN_ISOLATION_DEG,
 )
 from .processing import (
     process_data, find_local_peak, estimate_phase_composition,
     estimate_phase_composition_nnls,
-    measure_fwhm, scherrer_size,
+    measure_fwhm, scherrer_size, _interp_crossing,
 )
 from .simulation import get_anatase_peaks, get_rutile_peaks
 
@@ -187,6 +188,12 @@ def plot_one_sample(
 
     # ── Scherrer size for characteristic peaks ────────────────────────────
 
+    verified_tts: list[float] = []
+    for ref_tt_peak in list(ANATASE_REF.values()) + list(RUTILE_REF.values()):
+        result = find_local_peak(ref_tt_peak, two_theta, smoothed)
+        if result is not None:
+            verified_tts.append(result[0])
+
     scherrer_key_peaks = {
         "Anatase": ("(101)", ANATASE_REF["(101)"]),
         "Rutile": ("(110)", RUTILE_REF["(110)"]),
@@ -197,7 +204,8 @@ def plot_one_sample(
         if result is None:
             continue
         actual_tt, iv = result
-        fwhm = measure_fwhm(actual_tt, two_theta, smoothed)
+        neighbors = [t for t in verified_tts if abs(t - actual_tt) > 1e-6]
+        fwhm = measure_fwhm(actual_tt, two_theta, smoothed, neighbor_tts=neighbors)
         if fwhm is None:
             continue
         size = scherrer_size(fwhm, actual_tt)
@@ -281,22 +289,27 @@ def diagnose_peaks(
     smoothed, baseline = process_data(intensity)
     y_max = float(np.max(smoothed))
 
-    ref_rows: list[tuple[str, float, float, float, str, float, float]] = []
+    verified: list[tuple[str, float, float, float, str]] = []
     for hkl, tt in ANATASE_REF.items():
         result = find_local_peak(tt, two_theta, smoothed)
         if result is not None:
             actual_tt, iv = result
-            fwhm = measure_fwhm(actual_tt, two_theta, smoothed)
-            size = scherrer_size(fwhm, actual_tt) if fwhm is not None else 0.0
-            ref_rows.append((hkl, tt, actual_tt, iv, "Anatase", fwhm or 0.0, size))
+            verified.append((hkl, tt, actual_tt, iv, "Anatase"))
     for hkl, tt in RUTILE_REF.items():
         result = find_local_peak(tt, two_theta, smoothed)
         if result is not None:
             actual_tt, iv = result
-            fwhm = measure_fwhm(actual_tt, two_theta, smoothed)
-            size = scherrer_size(fwhm, actual_tt) if fwhm is not None else 0.0
-            ref_rows.append((hkl, tt, actual_tt, iv, "Rutile", fwhm or 0.0, size))
-    ref_rows.sort(key=lambda r: r[1])
+            verified.append((hkl, tt, actual_tt, iv, "Rutile"))
+    verified.sort(key=lambda r: r[1])
+
+    all_tts = [v[2] for v in verified]
+
+    ref_rows: list[tuple[str, float, float, float, str, float, float]] = []
+    for hkl, ref_tt, actual_tt, iv, phase in verified:
+        neighbors = [t for t in all_tts if abs(t - actual_tt) > 1e-6]
+        fwhm = measure_fwhm(actual_tt, two_theta, smoothed, neighbor_tts=neighbors)
+        size = scherrer_size(fwhm, actual_tt) if fwhm is not None else 0.0
+        ref_rows.append((hkl, ref_tt, actual_tt, iv, phase, fwhm or 0.0, size))
 
     n_found = len(ref_rows)
     n_total = len(ANATASE_REF) + len(RUTILE_REF)
@@ -310,7 +323,8 @@ def diagnose_peaks(
           f"  base_window={CONFIG['local_base_window']}°"
           f"  prominence_min={CONFIG['local_prominence_min']} (local)")
     print(f"  Scherrer: K={SCHERRER_K}  λ={WAVELENGTH_NM:.5f} nm"
-          f"  instrumental FWHM={INSTRUMENTAL_FWHM_DEG:.3f}°")
+          f"  instr FWHM={INSTRUMENTAL_FWHM_DEG:.3f}°"
+          f"  min isolation={SCHERRER_MIN_ISOLATION_DEG}°")
     print(f"  Raw data: {len(intensity)} points, "
           f"2θ range [{two_theta[0]:.2f}°, {two_theta[-1]:.2f}°]")
     print(f"  Peaks verified: {n_found} / {n_total} ref. positions")
@@ -441,4 +455,144 @@ def diagnose_peaks(
         fig.savefig(out_path, format=fmt, dpi=300, bbox_inches="tight",
                     transparent=True)
         print(f"  Diagnostic figure saved: {out_path}")
+    plt.close(fig)
+
+
+def plot_fwhm_debug(
+    ref_tt: float,
+    two_theta: np.ndarray,
+    smoothed: np.ndarray,
+    phase: str,
+    hkl: str,
+    out_dir: Path,
+) -> None:
+    """Generate a zoomed-in debug figure showing the FWHM measurement.
+
+    Displays the corrected data segment around the peak, the half-maximum
+    line, the left/right interpolated crossing points, and the derived
+    Scherrer size.
+    """
+    import math
+
+    result = find_local_peak(ref_tt, two_theta, smoothed)
+    if result is None:
+        print(f"    [FWHM debug] {phase} {hkl}: peak not found, skipping")
+        return
+    actual_tt, _ = result
+
+    search_window = CONFIG["local_base_window"]
+    lo, hi = actual_tt - search_window, actual_tt + search_window
+    mask = (two_theta >= lo) & (two_theta <= hi)
+    if mask.sum() < 5:
+        print(f"    [FWHM debug] {phase} {hkl}: too few data points in window")
+        return
+    indices = np.flatnonzero(mask)
+    start, end = int(indices[0]), int(indices[-1])
+
+    segment = smoothed[start:end + 1]
+    tt_seg = two_theta[start:end + 1]
+
+    i_peak = int(np.argmax(segment))
+    if i_peak == 0 or i_peak == end - start:
+        print(f"    [FWHM debug] {phase} {hkl}: peak at window boundary")
+        return
+    peak_h = float(segment[i_peak])
+    peak_tt_actual = float(tt_seg[i_peak])
+    half_h = peak_h / 2.0
+
+    left_tt = _interp_crossing(tt_seg, segment, half_h, i_peak, direction=-1)
+    right_tt = _interp_crossing(tt_seg, segment, half_h, i_peak, direction=+1)
+    if left_tt is None or right_tt is None:
+        print(f"    [FWHM debug] {phase} {hkl}: half-max crossings not found")
+        return
+
+    fwhm = right_tt - left_tt
+    size = scherrer_size(fwhm, peak_tt_actual)
+    c = COLOR_ANATASE if phase == "Anatase" else COLOR_RUTILE
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    ax.plot(tt_seg, segment, linewidth=1.2, color=c,
+            label=f"{phase} {hkl} (corrected)")
+
+    ax.scatter([peak_tt_actual], [peak_h], marker="v", color=c, s=60,
+               edgecolors="white", linewidths=1.0, zorder=5)
+    ax.annotate(
+        f"peak: {peak_tt_actual:.3f}°\nh={peak_h:.1f}",
+        xy=(peak_tt_actual, peak_h), xytext=(0, 15),
+        textcoords="offset points", fontsize=8, color=c,
+        ha="center", va="bottom",
+    )
+
+    ax.axhline(y=half_h, color="gray", linestyle="--", linewidth=0.8,
+               label=f"half-max = {half_h:.1f}")
+
+    left_y = float(np.interp(left_tt, tt_seg, segment))
+    ax.scatter([left_tt], [left_y], marker=">", color="orange", s=60,
+               edgecolors="white", linewidths=0.8, zorder=5)
+    ax.annotate(
+        f"{left_tt:.3f}°",
+        xy=(left_tt, left_y), xytext=(0, -12),
+        textcoords="offset points", fontsize=7, color="orange",
+        ha="center", va="top",
+    )
+
+    right_y = float(np.interp(right_tt, tt_seg, segment))
+    ax.scatter([right_tt], [right_y], marker="<", color="orange", s=60,
+               edgecolors="white", linewidths=0.8, zorder=5)
+    ax.annotate(
+        f"{right_tt:.3f}°",
+        xy=(right_tt, right_y), xytext=(0, -12),
+        textcoords="offset points", fontsize=7, color="orange",
+        ha="center", va="top",
+    )
+
+    mid_tt = (left_tt + right_tt) / 2.0
+    ax.annotate(
+        "", xy=(left_tt, half_h), xytext=(right_tt, half_h),
+        arrowprops=dict(arrowstyle="<->", color="red", linewidth=1.5,
+                        shrinkA=0, shrinkB=0),
+    )
+    ax.annotate(
+        f"FWHM = {fwhm:.4f}°\nD = {size:.1f} nm",
+        xy=(mid_tt, half_h), xytext=(0, 18),
+        textcoords="offset points", fontsize=9, color="red",
+        ha="center", va="bottom",
+        bbox=dict(boxstyle="round,pad=0.2", facecolor="white", alpha=0.85,
+                  edgecolor="red"),
+    )
+
+    beta_deg = math.sqrt(max(0.0, fwhm**2 - INSTRUMENTAL_FWHM_DEG**2))
+    beta_rad = math.radians(beta_deg)
+    theta_rad = math.radians(peak_tt_actual / 2.0)
+    cos_theta = math.cos(theta_rad)
+    info_text = (
+        f"β = √(FWHM² − β_inst²) = √({fwhm:.4f}² − {INSTRUMENTAL_FWHM_DEG:.3f}²) = {beta_deg:.4f}°\n"
+        f"D = K·λ / (β_rad · cos θ) = {SCHERRER_K} × {WAVELENGTH_NM:.5f} / "
+        f"({beta_rad:.6f} × {cos_theta:.4f}) = {size:.1f} nm"
+    )
+    ax.text(
+        0.98, 0.02, info_text,
+        transform=ax.transAxes, fontsize=6, va="bottom", ha="right",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.85,
+                  edgecolor="gray"),
+    )
+
+    ax.set_xlabel("2θ / degree", fontsize=CONFIG["font_axis_label"])
+    ax.set_ylabel("Intensity (corrected)", fontsize=CONFIG["font_axis_label"])
+    ax.set_title(
+        f"FWHM Debug — {phase} {hkl}  "
+        f"(Scherrer: K={SCHERRER_K}, λ={WAVELENGTH_NM:.5f} nm, "
+        f"β_inst={INSTRUMENTAL_FWHM_DEG:.3f}°)",
+        fontsize=CONFIG["font_title"] - 2, fontweight="bold",
+    )
+    ax.legend(fontsize=CONFIG["font_legend"], framealpha=0.85)
+    ax.tick_params(labelsize=CONFIG["font_tick"])
+
+    safe_hkl = hkl.replace("(", "").replace(")", "").replace("/", "_")
+    for fmt in ("svg", "pdf"):
+        out_path = out_dir / f"fwhm_debug_{phase}_{safe_hkl}.{fmt}"
+        fig.savefig(out_path, format=fmt, dpi=300, bbox_inches="tight",
+                    transparent=True)
+        print(f"    FWHM debug saved: {out_path}")
     plt.close(fig)

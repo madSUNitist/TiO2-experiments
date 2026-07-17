@@ -90,6 +90,7 @@ def process_single_image(
         df["feret_x2"] = fl[:, 2]
         df["feret_y2"] = fl[:, 3]
 
+    df["single"] = single_mask.astype(int)
     df.to_csv(dirs["data"] / f"{name}_particles.csv", index=False)
 
     size_data = feret_nm[single_mask] if n_single > 0 else feret_nm
@@ -176,6 +177,14 @@ def _write_summary(results: dict, dirs: dict[str, Path]) -> None:
     print(f"\nSummary saved to {dirs['data'] / 'summary.csv'}")
 
 
+def _resolve_combined_unit(results: dict) -> str:
+    rows = results.get("summary_rows", [])
+    for r in rows:
+        if r.get("scale_nm_px", 0) <= 0:
+            return "px"
+    return "nm"
+
+
 def _write_combined_histogram(results: dict, dirs: dict[str, Path]) -> None:
     all_sizes = results.get("all_sizes", {})
     if len(all_sizes) < 2:
@@ -195,11 +204,13 @@ def _write_combined_histogram(results: dict, dirs: dict[str, Path]) -> None:
         labels.append(f"{gname} (n={len(gv)})")
 
     if group_vals:
+        unit = _resolve_combined_unit(results)
         save_combined_histogram(
             group_vals, labels, GROUP_COLORS,
             str(dirs["histograms"] / "combined_histogram.svg"),
+            unit=unit,
         )
         all_vals = np.concatenate(group_vals)
         print(f"\nCombined histogram saved to {dirs['histograms'] / 'combined_histogram'}")
         print(f"  n={len(all_vals)} mean={all_vals.mean():.0f} "
-              f"std={all_vals.std():.0f} median={np.median(all_vals):.0f} nm")
+              f"std={all_vals.std():.0f} median={np.median(all_vals):.0f} {unit}")

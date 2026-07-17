@@ -10,6 +10,7 @@ from scipy.sparse.linalg import spsolve
 from .config import (
     ANATASE_REF, RUTILE_REF, CONFIG,
     SCHERRER_K, WAVELENGTH_NM, INSTRUMENTAL_FWHM_DEG,
+    SCHERRER_MIN_ISOLATION_DEG,
 )
 
 
@@ -203,14 +204,26 @@ def measure_fwhm(
     smoothed: np.ndarray,
     *,
     search_window: float | None = None,
+    neighbor_tts: list[float] | None = None,
 ) -> float | None:
     """Measure FWHM of a peak centred at peak_tt on baseline-corrected data.
 
     Uses linear interpolation to locate the half-maximum crossings.
     Returns FWHM in degrees, or None if the measurement fails.
+
+    Parameters
+    ----------
+    neighbor_tts : list of other verified peak positions (2θ°).
+        If any neighbour is within SCHERRER_MIN_ISOLATION_DEG of this peak,
+        the measurement is skipped to avoid contamination by overlapping peaks.
     """
     if search_window is None:
         search_window = CONFIG["local_base_window"]
+
+    if neighbor_tts is not None:
+        for nb in neighbor_tts:
+            if abs(nb - peak_tt) < SCHERRER_MIN_ISOLATION_DEG and abs(nb - peak_tt) > 1e-6:
+                return None
 
     lo, hi = peak_tt - search_window, peak_tt + search_window
     mask = (two_theta >= lo) & (two_theta <= hi)

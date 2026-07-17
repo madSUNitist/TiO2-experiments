@@ -46,8 +46,8 @@ def save_histogram(
     ax.tick_params(labelsize=10)
     ax.text(
         0.97, 0.95,
-        f"mean = {mean_ln:.0f} {unit}\n"
-        f"std  = {std_ln:.0f} {unit}\n"
+        f"mean = {size_data.mean():.0f} {unit}\n"
+        f"std  = {size_data.std():.0f} {unit}\n"
         f"median = {np.median(size_data):.0f} {unit}",
         transform=ax.transAxes, fontsize=9, ha="right", va="top",
         bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
@@ -63,6 +63,7 @@ def save_combined_histogram(
     labels: list[str],
     colors: list[str],
     out_path: str,
+    unit: str = "nm",
 ) -> None:
     """Save stacked combined histogram across image groups."""
     all_vals = np.concatenate(group_vals)
@@ -88,16 +89,16 @@ def save_combined_histogram(
     ml = np.exp(mu + sigma**2 / 2)
     sl = ml * np.sqrt(np.exp(sigma**2) - 1)
 
-    ax.set_xlabel("Feret diameter (nm)", fontsize=12)
+    ax.set_xlabel(f"Feret diameter ({unit})", fontsize=12)
     ax.set_ylabel("Density", fontsize=12)
     ax.set_title(f"Combined  —  {len(all_vals)} particles", fontsize=13, fontweight="bold")
     ax.legend(fontsize=8, ncol=2)
     ax.tick_params(labelsize=10)
     ax.text(
         0.97, 0.95,
-        f"mean = {ml:.0f} nm\n"
-        f"std  = {sl:.0f} nm\n"
-        f"median = {np.median(all_vals):.0f} nm",
+        f"mean = {all_vals.mean():.0f} {unit}\n"
+        f"std  = {all_vals.std():.0f} {unit}\n"
+        f"median = {np.median(all_vals):.0f} {unit}",
         transform=ax.transAxes, fontsize=9, ha="right", va="top",
         bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
                   edgecolor="#cccccc", alpha=0.9),
@@ -105,3 +106,53 @@ def save_combined_histogram(
     fig.tight_layout()
     fig.savefig(out_path, transparent=True)
     plt.close(fig)
+
+
+def regenerate_combined_histogram(
+    data_dir: str,
+    out_path: str,
+    stack_groups: list[tuple[str, list[str]]],
+    colors: list[str],
+    scale: dict[str, float],
+) -> None:
+    """Regenerate combined histogram from existing CSV files, using
+    the ``single`` column to select single particles without re-running
+    homography / segmentation / classification."""
+    import pandas as pd
+    from pathlib import Path
+
+    data = Path(data_dir)
+    group_vals: list[np.ndarray] = []
+    labels: list[str] = []
+
+    unit: str = "nm"
+    for gname, keys in stack_groups:
+        vals = []
+        for k in keys:
+            csv_path = data / f"{k}_particles.csv"
+            if not csv_path.exists():
+                continue
+            df = pd.read_csv(csv_path)
+            if "single" not in df.columns or "feret_nm" not in df.columns:
+                continue
+            single = df[df["single"] == 1]["feret_nm"].to_numpy(dtype=np.float64)
+            if len(single) == 0:
+                continue
+            vals.append(single)
+            if scale.get(k, 0) <= 0:
+                unit = "px"
+        if not vals:
+            continue
+        gv = np.concatenate(vals)
+        group_vals.append(gv)
+        labels.append(f"{gname} (n={len(gv)})")
+
+    if not group_vals:
+        print("No data found in CSV files.")
+        return
+
+    save_combined_histogram(group_vals, labels, colors, out_path, unit=unit)
+    all_vals = np.concatenate(group_vals)
+    print(f"Combined histogram saved: {out_path}")
+    print(f"  n={len(all_vals)}  mean={all_vals.mean():.0f}  "
+          f"std={all_vals.std():.0f}  median={np.median(all_vals):.0f} {unit}")

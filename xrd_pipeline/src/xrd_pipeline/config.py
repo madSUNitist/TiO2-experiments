@@ -41,7 +41,7 @@ RUTILE_REF = {
 # Instrument parameters for simulated patterns
 SIM_WAVELENGTH_A = 1.5406
 SIM_VOLTAGE_KV = 40.0
-SIM_CURRENT_MA = 10.0
+SIM_CURRENT_MA = 40.0
 SIM_TWO_THETA_RANGE = (10.0, 80.0)
 
 CONFIG: dict = {
@@ -52,7 +52,7 @@ CONFIG: dict = {
     "local_base_window": 2.0,
     "local_prominence_min": 0.10,
     "dedup_tolerance": 0.15,
-    "sg_window": 7,
+    "sg_window": 15,
     "sg_polyorder": 3,
     "figsize": (18, 6),
     "font_title": 14,
@@ -66,6 +66,7 @@ CONFIG: dict = {
 SCHERRER_K = 0.89
 WAVELENGTH_NM = 0.15406
 INSTRUMENTAL_FWHM_DEG = 0.01
+SCHERRER_MIN_ISOLATION_DEG = 1.5
 
 COLOR_ANATASE = "#2166ac"
 COLOR_RUTILE = "#b2182b"
