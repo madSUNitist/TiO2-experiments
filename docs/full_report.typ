@@ -546,4 +546,7 @@ Scherrer 公式估算的晶粒尺寸 (@fig:scherrer_table) 表明锐钛矿相干
 
 #pagebreak()
 
-#include "scripts-images.typ"
+#image("./scripts/01.jpg")
+#image("./scripts/02.jpg")
+#image("./scripts/03.jpg")
+#image("./scripts/04.jpg")
