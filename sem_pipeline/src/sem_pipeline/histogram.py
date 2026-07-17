@@ -17,7 +17,7 @@ def save_histogram(
     unit: str = "nm",
 ) -> None:
     """Save single-image histogram with log-normal fit."""
-    fig, ax = plt.subplots(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 4.5))
     fig.patch.set_alpha(0)
     ax.set_facecolor("none")
 
@@ -44,6 +44,8 @@ def save_histogram(
     ax.set_ylabel("Density", fontsize=12)
     ax.set_title(f"{name}  —  {len(size_data)} single particles", fontsize=13, fontweight="bold")
     ax.tick_params(labelsize=10)
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
     ax.text(
         0.97, 0.95,
         f"mean = {size_data.mean():.0f} {unit}\n"
@@ -69,7 +71,7 @@ def save_combined_histogram(
     all_vals = np.concatenate(group_vals)
     bins = np.histogram_bin_edges(all_vals, bins=50)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 5))
     fig.patch.set_alpha(0)
     ax.set_facecolor("none")
 
@@ -94,6 +96,8 @@ def save_combined_histogram(
     ax.set_title(f"Combined  —  {len(all_vals)} particles", fontsize=13, fontweight="bold")
     ax.legend(fontsize=8, ncol=2)
     ax.tick_params(labelsize=10)
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
     ax.text(
         0.97, 0.95,
         f"mean = {all_vals.mean():.0f} {unit}\n"

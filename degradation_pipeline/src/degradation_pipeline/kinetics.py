@@ -37,7 +37,7 @@ def plot_degradation_curve(t_data=None, A_data=None, suffix="") -> None:
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(6, 4.5))
+    fig, ax = plt.subplots(figsize=(6, 3.5))
     fig.patch.set_alpha(0)
     ax.set_facecolor("none")
 
@@ -51,6 +51,8 @@ def plot_degradation_curve(t_data=None, A_data=None, suffix="") -> None:
                  fontweight="bold")
     ax.set_ylim(0, 1.05)
     ax.tick_params(labelsize=10)
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
     ax.legend(fontsize=10, framealpha=0.5,
               edgecolor="#cccccc").get_frame().set_facecolor("white")
 
@@ -82,7 +84,7 @@ def plot_kinetic_fit(t_data=None, A_data=None, suffix="") -> None:
     t_fit = np.linspace(0, t_d.max() * 1.05, 100)
     ln_fit = slope * t_fit + intercept
 
-    fig, ax = plt.subplots(figsize=(6, 4.5))
+    fig, ax = plt.subplots(figsize=(6, 3.5))
     fig.patch.set_alpha(0)
     ax.set_facecolor("none")
 
@@ -99,6 +101,10 @@ def plot_kinetic_fit(t_data=None, A_data=None, suffix="") -> None:
     ax.set_title("First-Order Kinetic Fit", fontsize=13,
                  fontweight="bold")
     ax.tick_params(labelsize=10)
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.spines["bottom"].set_position("zero")
+    ax.xaxis.set_label_coords(0.5, -0.12)
     ax.legend(fontsize=9, framealpha=0.5,
               edgecolor="#cccccc").get_frame().set_facecolor("white")
 

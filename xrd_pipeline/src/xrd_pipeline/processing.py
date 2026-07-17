@@ -11,6 +11,9 @@ from .config import (
     ANATASE_REF, RUTILE_REF, CONFIG,
     SCHERRER_K, WAVELENGTH_NM, INSTRUMENTAL_FWHM_DEG,
     SCHERRER_MIN_ISOLATION_DEG,
+    NOISE_SIGMA_MULTIPLIER, NOISE_LOW_FRAC,
+    ANATASE_MIN_INDEPENDENT_PEAKS, ANATASE_MAIN_PEAKS,
+    RUTILE_MIN_INDEPENDENT_PEAKS, RUTILE_MAIN_PEAKS,
 )
 
 
@@ -58,14 +61,30 @@ def process_data(intensity: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return smoothed, baseline
 
 
+def estimate_noise_floor(smoothed: np.ndarray) -> tuple[float, float]:
+    """Estimate noise RMS from baseline-corrected smoothed data.
+
+    Uses the lowest-intensity region (by NOISE_LOW_FRAC) to avoid peaks.
+    Returns (noise_rms, detection_limit) where detection_limit =
+    NOISE_SIGMA_MULTIPLIER * noise_rms.
+    """
+    n_low = max(int(len(smoothed) * NOISE_LOW_FRAC), 50)
+    low_vals = np.sort(np.abs(smoothed))[:n_low]
+    noise_rms = float(np.sqrt(np.mean(low_vals ** 2)))
+    detection_limit = NOISE_SIGMA_MULTIPLIER * noise_rms
+    return noise_rms, detection_limit
+
+
 def find_local_peak(
     ref_tt: float,
     two_theta: np.ndarray,
     smoothed: np.ndarray,
+    noise_threshold: float | None = None,
 ) -> tuple[float, float] | None:
     """Find the real local maximum near a reference 2θ.
 
-    Returns (actual_2theta, intensity) or None.
+    Returns (actual_2theta, intensity) or None if the peak fails
+    prominence or absolute-noise checks.
     """
     n_window = CONFIG["local_search_window"]
     w_window = CONFIG["local_base_window"]
@@ -102,19 +121,40 @@ def find_local_peak(
     if prominence < wide_range * CONFIG["local_prominence_min"]:
         return None
 
-    return float(two_theta[global_idx]), peak_h
+    if noise_threshold is not None and peak_h < noise_threshold:
+        return None
+
+    actual_tt = float(two_theta[global_idx])
+    if abs(actual_tt - ref_tt) > CONFIG["max_peak_shift"]:
+        return None
+
+    return actual_tt, peak_h
 
 
 def estimate_phase_composition(
-    two_theta: np.ndarray, intensity: np.ndarray,
+    two_theta: np.ndarray,
+    intensity: np.ndarray,
+    noise_threshold: float = 0.0,
+    anatase_verified: bool = True,
+    rutile_verified: bool = True,
 ) -> tuple[float, float, str]:
-    """Estimate Anatase/Rutile ratio using Spurr-Myers formula."""
+    """Estimate Anatase/Rutile ratio using Spurr-Myers formula.
+
+    Parameters
+    ----------
+    noise_threshold : peak height below this value is treated as noise (0)
+    anatase_verified : whether anatase phase passed independent-peak consensus
+    rutile_verified : whether rutile phase passed independent-peak consensus
+    """
 
     def _peak_height(center: float, width: float = 0.15) -> float:
         mask = (two_theta >= center - width) & (two_theta <= center + width)
         if not mask.any():
             return 0.0
-        return float(np.max(intensity[mask]))
+        val = float(np.max(intensity[mask]))
+        if val < noise_threshold:
+            return 0.0
+        return val
 
     i_a = _peak_height(ANATASE_REF["(101)"])
     i_r = _peak_height(RUTILE_REF["(110)"])
@@ -122,13 +162,66 @@ def estimate_phase_composition(
     if i_a > 0 and i_r > 0:
         anatase_pct = round(100.0 / (1.0 + 1.26 * i_r / i_a), 1)
         rutile_pct = round(100.0 - anatase_pct, 1)
+        if not anatase_verified and not rutile_verified:
+            return anatase_pct, rutile_pct, "inconclusive (both phases lack consensus)"
+        if not rutile_verified:
+            return anatase_pct, rutile_pct, "Rutile tentative (insufficient independent peaks)"
+        if not anatase_verified:
+            return anatase_pct, rutile_pct, "Anatase tentative (insufficient independent peaks)"
         return anatase_pct, rutile_pct, ""
     elif i_a > 0:
+        if not anatase_verified:
+            return 100.0, 0.0, "Anatase tentative (insufficient independent peaks)"
         return 100.0, 0.0, "pure Anatase"
     elif i_r > 0:
+        if not rutile_verified:
+            return 0.0, 100.0, "Rutile tentative (insufficient independent peaks)"
         return 0.0, 100.0, "pure Rutile"
     else:
         return 0.0, 0.0, "no characteristic peaks detected"
+
+
+def is_phase_confidently_present(
+    verified_peaks: list[tuple[str, float, float, float, str]],
+    phase: str,
+) -> tuple[bool, int, list[str]]:
+    """Check phase presence by consensus of independent characteristic peaks.
+
+    For each phase, requires at least min_independent main peaks that are not
+    within dedup_tolerance of any reference position of the other phase.
+
+    Parameters
+    ----------
+    verified_peaks : (hkl, ref_tt, actual_tt, intensity, phase) tuples
+    phase : "Anatase" or "Rutile"
+
+    Returns
+    -------
+    (is_confident, independent_count, independent_hkl_list)
+    """
+    dedup_tol = CONFIG["dedup_tolerance"]
+
+    if phase == "Anatase":
+        main_peaks = ANATASE_MAIN_PEAKS
+        min_peaks = ANATASE_MIN_INDEPENDENT_PEAKS
+        other_tts = list(RUTILE_REF.values())
+    elif phase == "Rutile":
+        main_peaks = RUTILE_MAIN_PEAKS
+        min_peaks = RUTILE_MIN_INDEPENDENT_PEAKS
+        other_tts = list(ANATASE_REF.values())
+    else:
+        return False, 0, []
+
+    phase_peaks = [v for v in verified_peaks if v[4] == phase]
+    independent: list[str] = []
+    for hkl, ref_tt, actual_tt, iv, ph in phase_peaks:
+        if hkl not in main_peaks:
+            continue
+        if all(abs(ref_tt - o_tt) >= dedup_tol for o_tt in other_tts):
+            independent.append(hkl)
+
+    count = len(independent)
+    return count >= min_peaks, count, independent
 
 
 def estimate_phase_composition_nnls(

@@ -15,11 +15,14 @@ from .config import (
     SIM_TWO_THETA_RANGE,
     SCHERRER_K, WAVELENGTH_NM, INSTRUMENTAL_FWHM_DEG,
     SCHERRER_MIN_ISOLATION_DEG,
+    RUTILE_MIN_INDEPENDENT_PEAKS,
+    ANATASE_MIN_INDEPENDENT_PEAKS,
 )
 from .processing import (
     process_data, find_local_peak, estimate_phase_composition,
     estimate_phase_composition_nnls,
     measure_fwhm, scherrer_size, _interp_crossing,
+    estimate_noise_floor, is_phase_confidently_present,
 )
 from .simulation import get_anatase_peaks, get_rutile_peaks
 
@@ -72,6 +75,7 @@ def _draw_sim_panel(
     ax.tick_params(left=False, labelleft=False)
 
     ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
 
     legend_sim = [
         Line2D([0], [0], color=COLOR_ANATASE, linewidth=2, alpha=0.75,
@@ -93,8 +97,31 @@ def plot_one_sample(
     print(f"  Processing: {sample_label}")
 
     smoothed, baseline = process_data(intensity)
-    anat_pct, rut_pct, comp_status = estimate_phase_composition(two_theta, smoothed)
+    noise_rms, noise_threshold = estimate_noise_floor(smoothed)
     y_max = float(np.max(smoothed))
+
+    # verify all reference peaks with noise threshold
+    verified_all: list[tuple[str, float, float, float, str]] = []
+    for hkl, ref_tt in ANATASE_REF.items():
+        result = find_local_peak(ref_tt, two_theta, smoothed, noise_threshold)
+        if result is not None:
+            actual_tt, iv = result
+            verified_all.append((hkl, ref_tt, actual_tt, iv, "Anatase"))
+    for hkl, ref_tt in RUTILE_REF.items():
+        result = find_local_peak(ref_tt, two_theta, smoothed, noise_threshold)
+        if result is not None:
+            actual_tt, iv = result
+            verified_all.append((hkl, ref_tt, actual_tt, iv, "Rutile"))
+    verified_all.sort(key=lambda r: r[1])  # sort by ref_tt
+
+    anatase_confident, anatase_indep_count, anatase_indep_peaks = (
+        is_phase_confidently_present(verified_all, "Anatase"))
+    rutile_confident, rutile_indep_count, rutile_indep_peaks = (
+        is_phase_confidently_present(verified_all, "Rutile"))
+
+    anat_pct, rut_pct, comp_status = estimate_phase_composition(
+        two_theta, smoothed, noise_threshold,
+        anatase_verified=anatase_confident, rutile_verified=rutile_confident)
 
     tt_anatase, sim_anatase = get_anatase_peaks()
     tt_rutile, sim_rutile = get_rutile_peaks()
@@ -115,13 +142,10 @@ def plot_one_sample(
                 linestyle="--", alpha=0.50, zorder=0)
     ax_exp.plot(two_theta, smoothed, linewidth=0.7, color=COLOR_PATTERN, zorder=1)
 
+    # build verified-only peak list for plotting (deduplicated)
     peaks_by_ref: list[tuple[float, float, str, str]] = []
-    for hkl, ref_tt in ANATASE_REF.items():
-        iv = float(np.interp(ref_tt, two_theta, smoothed))
-        peaks_by_ref.append((ref_tt, iv, hkl, "Anatase"))
-    for hkl, ref_tt in RUTILE_REF.items():
-        iv = float(np.interp(ref_tt, two_theta, smoothed))
-        peaks_by_ref.append((ref_tt, iv, hkl, "Rutile"))
+    for hkl, ref_tt, actual_tt, iv, phase in verified_all:
+        peaks_by_ref.append((actual_tt, iv, hkl, phase))
     peaks_by_ref.sort(key=lambda x: x[0])
 
     DEDUP = CONFIG["dedup_tolerance"]
@@ -188,19 +212,16 @@ def plot_one_sample(
 
     # ── Scherrer size for characteristic peaks ────────────────────────────
 
-    verified_tts: list[float] = []
-    for ref_tt_peak in list(ANATASE_REF.values()) + list(RUTILE_REF.values()):
-        result = find_local_peak(ref_tt_peak, two_theta, smoothed)
-        if result is not None:
-            verified_tts.append(result[0])
+    verified_tts: list[float] = [v[2] for v in verified_all]
 
-    scherrer_key_peaks = {
-        "Anatase": ("(101)", ANATASE_REF["(101)"]),
-        "Rutile": ("(110)", RUTILE_REF["(110)"]),
-    }
+    scherrer_key_peaks = {}
+    if anatase_confident:
+        scherrer_key_peaks["Anatase"] = ("(101)", ANATASE_REF["(101)"])
+    if rutile_confident:
+        scherrer_key_peaks["Rutile"] = ("(110)", RUTILE_REF["(110)"])
     size_info: list[str] = []
     for phase, (hkl, ref_tt) in scherrer_key_peaks.items():
-        result = find_local_peak(ref_tt, two_theta, smoothed)
+        result = find_local_peak(ref_tt, two_theta, smoothed, noise_threshold)
         if result is None:
             continue
         actual_tt, iv = result
@@ -240,6 +261,15 @@ def plot_one_sample(
     else:
         print(f"    NNLS: Anatase {a_nnls}%  Rutile {r_nnls}%  R^2={r2_nnls:.4f}")
 
+    if rutile_confident:
+        print(f"    Rutile : CONFIRMED ({rutile_indep_count}/{RUTILE_MIN_INDEPENDENT_PEAKS} indep. peaks)")
+    else:
+        print(f"    Rutile : TENTATIVE/ABSENT ({rutile_indep_count}/{RUTILE_MIN_INDEPENDENT_PEAKS} indep. peaks)")
+    if anatase_confident:
+        print(f"    Anatase: CONFIRMED ({anatase_indep_count}/{ANATASE_MIN_INDEPENDENT_PEAKS} indep. peaks)")
+    else:
+        print(f"    Anatase: TENTATIVE/ABSENT ({anatase_indep_count}/{ANATASE_MIN_INDEPENDENT_PEAKS} indep. peaks)")
+
     legend_exp = [
         Line2D([0], [0], color=COLOR_BASELINE, linewidth=1.5,
                linestyle="--", label="Baseline"),
@@ -247,13 +277,24 @@ def plot_one_sample(
     ax_exp.legend(handles=legend_exp, loc="upper right",
                   fontsize=CONFIG["font_legend"], framealpha=0.85)
 
-    if comp_status:
-        comp_text = comp_status
+    if anatase_confident and rutile_confident:
+        phase_line = "Phase: Anatase + Rutile (both confirmed)"
+    elif anatase_confident:
+        phase_line = "Phase: Anatase"
+    elif rutile_confident:
+        phase_line = "Phase: Rutile"
     else:
-        comp_text = (
-            f"Spurr-Myers:  Anatase {anat_pct}%  Rutile {rut_pct}%\n"
-            f"NNLS (R^2={r2_nnls:.3f}):  Anatase {a_nnls}%  Rutile {r_nnls}%"
-        )
+        phase_line = "Phase: inconclusive"
+
+    comp_text = phase_line
+    if comp_status:
+        comp_text += f"\n({comp_status})"
+    comp_text += (
+        f"\nAnatase: {anatase_indep_count}/{ANATASE_MIN_INDEPENDENT_PEAKS}  "
+        f"Rutile: {rutile_indep_count}/{RUTILE_MIN_INDEPENDENT_PEAKS}"
+        f"\nSpurr-Myers:  Anatase {anat_pct}%  Rutile {rut_pct}%"
+        f"\nNNLS (R^2={r2_nnls:.3f}):  Anatase {a_nnls}%  Rutile {r_nnls}%"
+    )
     ax_exp.text(
         0.02, 0.96, comp_text,
         transform=ax_exp.transAxes, fontsize=CONFIG["font_composition"], va="top",
@@ -266,10 +307,12 @@ def plot_one_sample(
     _draw_sim_panel(ax_sim, tt_anatase, sim_anatase, tt_rutile, sim_rutile,
                     with_title=False)
 
+    ax_sim.spines["top"].set_visible(True)
     ax_sim.spines["bottom"].set_visible(False)
     ax_sim.xaxis.set_ticks_position("top")
-    ax_sim.xaxis.set_label_position("top")
+    ax_sim.xaxis.set_label_position("bottom")
     ax_sim.set_xlabel("2θ / degree", fontsize=CONFIG["font_axis_label"])
+    ax_sim.tick_params(axis="x", top=True, labeltop=True)
 
     for fmt in ("svg", "pdf"):
         out_path = out_dir / f"{sample_label}.{fmt}"
@@ -287,20 +330,27 @@ def diagnose_peaks(
 ) -> None:
     """Diagnostic peak report + multi-panel figure."""
     smoothed, baseline = process_data(intensity)
+    noise_rms, noise_threshold = estimate_noise_floor(smoothed)
     y_max = float(np.max(smoothed))
 
     verified: list[tuple[str, float, float, float, str]] = []
     for hkl, tt in ANATASE_REF.items():
-        result = find_local_peak(tt, two_theta, smoothed)
+        result = find_local_peak(tt, two_theta, smoothed, noise_threshold)
         if result is not None:
             actual_tt, iv = result
             verified.append((hkl, tt, actual_tt, iv, "Anatase"))
     for hkl, tt in RUTILE_REF.items():
-        result = find_local_peak(tt, two_theta, smoothed)
+        result = find_local_peak(tt, two_theta, smoothed, noise_threshold)
         if result is not None:
             actual_tt, iv = result
             verified.append((hkl, tt, actual_tt, iv, "Rutile"))
     verified.sort(key=lambda r: r[1])
+
+    # Phase consensus
+    anatase_confident, anatase_indep_count, anatase_indep_peaks = (
+        is_phase_confidently_present(verified, "Anatase"))
+    rutile_confident, rutile_indep_count, rutile_indep_peaks = (
+        is_phase_confidently_present(verified, "Rutile"))
 
     all_tts = [v[2] for v in verified]
 
@@ -321,13 +371,27 @@ def diagnose_peaks(
           f"  baseline_p={CONFIG['baseline_p']}"
           f"  search_window={CONFIG['local_search_window']}°"
           f"  base_window={CONFIG['local_base_window']}°"
-          f"  prominence_min={CONFIG['local_prominence_min']} (local)")
+          f"  prominence_min={CONFIG['local_prominence_min']} (local)"
+          f"  max_shift={CONFIG['max_peak_shift']}°")
     print(f"  Scherrer: K={SCHERRER_K}  λ={WAVELENGTH_NM:.5f} nm"
           f"  instr FWHM={INSTRUMENTAL_FWHM_DEG:.3f}°"
           f"  min isolation={SCHERRER_MIN_ISOLATION_DEG}°")
     print(f"  Raw data: {len(intensity)} points, "
           f"2θ range [{two_theta[0]:.2f}°, {two_theta[-1]:.2f}°]")
     print(f"  Peaks verified: {n_found} / {n_total} ref. positions")
+    n_anatase = len([v for v in verified if v[4] == "Anatase"])
+    n_rutile = len([v for v in verified if v[4] == "Rutile"])
+    print(f"    Anatase: {n_anatase}/{len(ANATASE_REF)}  "
+          f"Rutile: {n_rutile}/{len(RUTILE_REF)}")
+    print(f"  Noise    : RMS={noise_rms:.2f}  detection limit={noise_threshold:.2f}")
+    print(f"  Consensus: Anatase {'CONFIRMED' if anatase_confident else 'TENTATIVE'}"
+          f"  ({anatase_indep_count}/{ANATASE_MIN_INDEPENDENT_PEAKS})"
+          f"  Rutile {'CONFIRMED' if rutile_confident else 'TENTATIVE'}"
+          f"  ({rutile_indep_count}/{RUTILE_MIN_INDEPENDENT_PEAKS})")
+    if anatase_indep_peaks:
+        print(f"             Anatase independent: {anatase_indep_peaks}")
+    if rutile_indep_peaks:
+        print(f"             Rutile independent : {rutile_indep_peaks}")
     print()
     hdr = (f"  {'hkl':>10s} | {'2θ ref':>8s} | {'2θ found':>8s} | "
            f"{'Intensity':>10s} | {'I/max':>8s} | {'FWHM':>8s} | "
@@ -445,10 +509,12 @@ def diagnose_peaks(
     _draw_sim_panel(ax_sim, tt_anatase, sim_anatase, tt_rutile, sim_rutile,
                     with_title=True)
 
+    ax_sim.spines["top"].set_visible(True)
     ax_sim.spines["bottom"].set_visible(False)
     ax_sim.xaxis.set_ticks_position("top")
-    ax_sim.xaxis.set_label_position("top")
+    ax_sim.xaxis.set_label_position("bottom")
     ax_sim.set_xlabel("2θ / degree", fontsize=CONFIG["font_axis_label"])
+    ax_sim.tick_params(axis="x", top=True, labeltop=True)
 
     for fmt in ("svg", "pdf"):
         out_path = out_dir / f"test_{sample_label}.{fmt}"

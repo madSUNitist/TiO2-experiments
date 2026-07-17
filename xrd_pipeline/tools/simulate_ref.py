@@ -95,7 +95,7 @@ def _make_profile(pattern, fwhm: float = FWHM, step: float = 0.01):
 
 
 def plot_individual(pattern, label: str, out_path: Path) -> None:
-    fig, ax = plt.subplots(figsize=(18, 6))
+    fig, ax = plt.subplots(figsize=(18, 4.5))
 
     x_profile, y_profile = _make_profile(pattern)
     ax.plot(x_profile, y_profile, linewidth=0.8, color=COLORS.get(label, "#202020"))
@@ -145,6 +145,8 @@ def plot_individual(pattern, label: str, out_path: Path) -> None:
     )
     ax.set_xlim(*TWO_THETA_RANGE)
     ax.tick_params(labelsize=10)
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
 
     fig.savefig(out_path, format="svg", dpi=300, bbox_inches="tight", transparent=True)
     plt.close(fig)
@@ -152,7 +154,7 @@ def plot_individual(pattern, label: str, out_path: Path) -> None:
 
 
 def plot_combined(patterns: list[tuple], out_path: Path) -> None:
-    fig, ax = plt.subplots(figsize=(18, 6))
+    fig, ax = plt.subplots(figsize=(18, 4.5))
 
     for label, pattern in patterns:
         x_profile, y_profile = _make_profile(pattern)
@@ -173,6 +175,8 @@ def plot_combined(patterns: list[tuple], out_path: Path) -> None:
     )
     ax.set_xlim(*TWO_THETA_RANGE)
     ax.tick_params(labelsize=10)
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
     ax.legend(fontsize=10, loc="upper right", framealpha=0.85)
 
     fig.savefig(out_path, format="svg", dpi=300, bbox_inches="tight", transparent=True)

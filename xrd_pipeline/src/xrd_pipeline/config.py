@@ -51,6 +51,7 @@ CONFIG: dict = {
     "local_search_window": 0.50,
     "local_base_window": 2.0,
     "local_prominence_min": 0.10,
+    "max_peak_shift": 0.25,
     "dedup_tolerance": 0.15,
     "sg_window": 15,
     "sg_polyorder": 3,
@@ -62,6 +63,17 @@ CONFIG: dict = {
     "font_peak_label": 7,
     "font_composition": 9,
 }
+
+# Noise detection
+NOISE_SIGMA_MULTIPLIER = 3.0    # peak height must exceed N * noise_rms to be considered
+NOISE_LOW_FRAC = 0.30           # fraction of lowest-intensity points used to estimate noise RMS
+
+# Phase consensus — both phases require minimum independent main peaks
+# Main peaks are strongest + fully independent of the other phase (> dedup_tolerance)
+ANATASE_MIN_INDEPENDENT_PEAKS = 3
+ANATASE_MAIN_PEAKS = {"(101)", "(200)", "(105)", "(004)", "(211)"}
+RUTILE_MIN_INDEPENDENT_PEAKS = 3
+RUTILE_MAIN_PEAKS = {"(110)", "(101)", "(211)", "(200)", "(111)"}
 
 SCHERRER_K = 0.89
 WAVELENGTH_NM = 0.15406
