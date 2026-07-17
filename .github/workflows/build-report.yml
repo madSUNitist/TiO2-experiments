@@ -32,19 +32,19 @@ jobs:
         run: |
           mkdir -p ~/.config/fontconfig
           cat > ~/.config/fontconfig/fonts.conf << 'FCEOF'
-      <?xml version="1.0"?>
-      <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-      <fontconfig>
-        <alias>
-          <family>Source Han Sans SC</family>
-          <prefer><family>Noto Sans CJK SC</family></prefer>
-        </alias>
-        <alias>
-          <family>Source Han Serif</family>
-          <prefer><family>Noto Serif CJK SC</family></prefer>
-        </alias>
-      </fontconfig>
-      FCEOF
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+          <fontconfig>
+            <alias>
+              <family>Source Han Sans SC</family>
+              <prefer><family>Noto Sans CJK SC</family></prefer>
+            </alias>
+            <alias>
+              <family>Source Han Serif</family>
+              <prefer><family>Noto Serif CJK SC</family></prefer>
+            </alias>
+          </fontconfig>
+          FCEOF
           fc-cache -fv
 
       - name: Setup Typst
